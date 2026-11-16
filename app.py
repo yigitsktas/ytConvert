@@ -1,6 +1,5 @@
 import os
 import re
-import secrets
 import shutil
 import tempfile
 from urllib.parse import quote, urlparse
@@ -28,22 +27,15 @@ COOKIES_FILE = os.path.join(BASE_DIR, 'cookies.txt')
 COOKIES_BROWSER = os.environ.get('COOKIES_BROWSER')
 
 
-# Canlıda (Render) APP_PASSWORD tanımlıysa site şifre ister; kullanıcı adı önemsiz.
-# Lokalde tanımlı değilse şifresiz çalışır.
-APP_PASSWORD = os.environ.get('APP_PASSWORD')
-
-
 @app.before_request
-def require_password():
-    if not APP_PASSWORD:
-        # Render'da (RENDER env'i otomatik gelir) şifre unutulursa site herkese açık kalmasın
-        if os.environ.get('RENDER'):
-            return Response('APP_PASSWORD ayarlanmamış. Render → Environment bölümünden ekle.', 503)
-        return None
-    auth = request.authorization
-    if auth and auth.password and secrets.compare_digest(auth.password, APP_PASSWORD):
-        return None
-    return Response('Şifre gerekli', 401, {'WWW-Authenticate': 'Basic realm="ytConvert"'})
+def same_origin_only():
+    # Sunucu localhost'ta çalışıyor; tarayıcıda açık başka bir sitenin
+    # arka planda /convert'e istek atmasını engelle (CSRF).
+    if request.method == 'POST':
+        origin = request.headers.get('Origin')
+        if origin and urlparse(origin).netloc != request.host:
+            return Response('Yetkisiz istek.', 403)
+    return None
 
 
 def sanitize_filename(title):
@@ -97,8 +89,8 @@ def build_options(fmt, platform, out_dir):
 def friendly_error(platform, message):
     msg = message.lower()
     if platform == 'instagram' and any(k in msg for k in ('login', 'not available', 'rate', 'empty media', 'cookies')):
-        return ('Instagram bu içerik için giriş istiyor. README\'deki cookies.txt adımını uygula '
-                've tekrar dene.')
+        return ('Instagram bu içerik için giriş istiyor. Proje klasörüne cookies.txt ekleyip '
+                'tekrar dene.')
     if platform == 'twitter' and ('login' in msg or 'sensitive' in msg or 'protected' in msg):
         return 'X bu gönderi için giriş istiyor (hassas içerik ya da gizli hesap). cookies.txt ekle.'
     if 'audio codec' in msg:
@@ -163,5 +155,5 @@ def convert():
 
 
 if __name__ == '__main__':
-    # Sadece localhost'ta dinler; dışarıya Tailscale üzerinden açılır
+    # Sadece localhost'ta dinler (masaüstü uygulaması buna bağlanır)
     app.run(host='127.0.0.1', port=int(os.environ.get('PORT', 5001)), threaded=True)

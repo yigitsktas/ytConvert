@@ -152,6 +152,8 @@
         .message.error { color: var(--err); }
         .message.success { color: var(--ok); }
 
+        .reveal { color: inherit; text-underline-offset: 3px; }
+
         .save-btn {
             width: 100%;
             margin-top: 12px;
@@ -216,6 +218,13 @@
             message.className = `message show ${type}`;
         }
 
+        // Masaüstü uygulaması: panoda desteklenen link varsa kutuya otomatik doldurur
+        window.ytcPrefill = (value) => {
+            if (urlInput.value.trim() || btn.disabled) return;
+            urlInput.value = value;
+            urlInput.dispatchEvent(new Event('input'));
+        };
+
         urlInput.addEventListener('input', () => {
             const value = urlInput.value.trim();
             const platform = value ? detectPlatform(value) : null;
@@ -257,7 +266,16 @@
                     link.click();
                     link.remove();
                     setTimeout(() => URL.revokeObjectURL(link.href), 60000);
-                    showMessage(`İndirildi · ${filename}`, 'success');
+                    const reveal = window.webkit?.messageHandlers?.reveal;
+                    showMessage(reveal ? `İndirilenler'e kaydedildi · ${filename}` : `İndirildi · ${filename}`, 'success');
+                    if (reveal) {
+                        const btn = document.createElement('a');
+                        btn.href = '#';
+                        btn.className = 'reveal';
+                        btn.textContent = "Finder'da göster";
+                        btn.onclick = (ev) => { ev.preventDefault(); reveal.postMessage(null); };
+                        message.append(' ', btn);
+                    }
                 }
             } catch (err) {
                 showMessage(err.message || 'Bir hata oluştu.', 'error');

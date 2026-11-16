@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: ytconvert
-    runtime: docker
-    plan: free
-    envVars:
-      - key: APP_PASSWORD
-        sync: false   # Render kurulumda soracak, repoya yazılmaz
