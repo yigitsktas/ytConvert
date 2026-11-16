@@ -36,6 +36,9 @@ APP_PASSWORD = os.environ.get('APP_PASSWORD')
 @app.before_request
 def require_password():
     if not APP_PASSWORD:
+        # Render'da (RENDER env'i otomatik gelir) şifre unutulursa site herkese açık kalmasın
+        if os.environ.get('RENDER'):
+            return Response('APP_PASSWORD ayarlanmamış. Render → Environment bölümünden ekle.', 503)
         return None
     auth = request.authorization
     if auth and auth.password and secrets.compare_digest(auth.password, APP_PASSWORD):

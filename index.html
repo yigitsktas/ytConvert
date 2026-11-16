@@ -1,246 +1,194 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="ytConvert">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
     <title>ytConvert</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --primary-accent: #38bdf8;
-            --secondary-accent: #818cf8;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --success: #22c55e;
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg: #ffffff;
+            --fg: #0a0a0a;
+            --muted: #8a8a8a;
+            --line: #e6e6e6;
+            --field: #f5f5f5;
+            --ok: #1a7f37;
+            --err: #cf222e;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0a0a0a;
+                --fg: #f2f2f2;
+                --muted: #7a7a7a;
+                --line: #222222;
+                --field: #161616;
+                --ok: #3fb950;
+                --err: #ff7b72;
+            }
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(129, 140, 248, 0.15) 0, transparent 50%);
-            color: var(--text-main);
+            background: var(--bg);
+            color: var(--fg);
+            font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow-x: hidden;
+            padding: 24px 16px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 3rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        main { width: 100%; max-width: 420px; }
 
         h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, var(--primary-accent), var(--secondary-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin-bottom: 24px;
         }
 
-        p.subtitle {
-            text-align: center;
-            color: var(--text-dim);
-            margin-bottom: 2.5rem;
-            font-size: 0.95rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+        h1 span { color: var(--muted); font-weight: 400; }
 
         input[type="text"] {
             width: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--glass-border);
+            height: 52px;
+            padding: 0 16px;
+            border: 1px solid var(--line);
             border-radius: 12px;
-            padding: 1rem 1.25rem;
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--field);
+            color: var(--fg);
+            font-size: 16px; /* iOS'ta odaklanınca zoom yapmasın */
             outline: none;
+            transition: border-color .15s;
         }
 
-        input[type="text"]:focus {
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
-            background: rgba(15, 23, 42, 0.8);
+        input[type="text"]:focus { border-color: var(--fg); }
+        input::placeholder { color: var(--muted); }
+
+        .hint {
+            height: 20px;
+            margin: 8px 2px 16px;
+            font-size: 13px;
+            color: var(--muted);
         }
 
-        .select-row {
+        .row { display: flex; gap: 8px; }
+
+        .seg {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        select {
-            flex: 1;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--glass-border);
+            padding: 3px;
+            border: 1px solid var(--line);
             border-radius: 12px;
-            padding: 1rem;
-            color: white;
-            font-size: 1rem;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.3s ease;
+            background: var(--field);
         }
 
-        select:focus {
-            border-color: var(--primary-accent);
+        .seg input { display: none; }
+
+        .seg label {
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            height: 44px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            user-select: none;
+            transition: background .15s, color .15s;
         }
+
+        .seg input:checked + label { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
 
         button {
-            width: 100%;
-            background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
-            color: white;
-            border: none;
+            flex: 1;
+            height: 52px;
+            border: 0;
             border-radius: 12px;
-            padding: 1.25rem;
-            font-size: 1.1rem;
+            background: var(--fg);
+            color: var(--bg);
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.75rem;
+            transition: opacity .15s;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
-            filter: brightness(1.1);
-        }
+        button:active { opacity: .8; }
+        button:disabled { opacity: .5; cursor: wait; }
 
-        button:active {
-            transform: translateY(0);
-        }
-
-        .loading-spinner {
+        .spinner {
             display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            width: 18px;
+            height: 18px;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
+            animation: spin .7s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .status-loading button .loading-spinner {
-            display: block;
-        }
-
-        .status-loading button span {
-            display: none;
-        }
+        .status-loading .spinner { display: block; }
+        .status-loading button span { display: none; }
 
         .message {
             display: none;
-            margin-top: 1.25rem;
-            padding: 0.9rem 1.1rem;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            border: 1px solid var(--glass-border);
-            background: rgba(15, 23, 42, 0.6);
+            margin-top: 16px;
+            font-size: 14px;
         }
 
         .message.show { display: block; }
-        .message.error { border-color: rgba(248, 113, 113, 0.5); color: #fca5a5; }
-        .message.success { border-color: rgba(34, 197, 94, 0.5); color: var(--success); }
-
-        .platform-hint {
-            min-height: 1.2rem;
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
+        .message.error { color: var(--err); }
+        .message.success { color: var(--ok); }
 
         .save-btn {
-            margin-top: 0.75rem;
-            padding: 0.9rem;
-            font-size: 1rem;
+            width: 100%;
+            margin-top: 12px;
+            flex: none;
         }
 
-        button:disabled { opacity: 0.7; cursor: wait; transform: none; }
-
-        .footer {
-            margin-top: 2rem;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            opacity: 0.6;
+        footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: var(--muted);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <h1>ytConvert</h1>
-            <p class="subtitle">YouTube, X (Twitter) & Instagram → MP3 / MP4</p>
-            
-            <form id="convertForm" action="/convert" method="post">
-                <div class="form-group">
-                    <input type="text" id="url" name="url" placeholder="Paste YouTube, X or Instagram link..." required>
-                    <div class="platform-hint" id="platformHint"></div>
-                </div>
-                
-                <div class="select-row">
-                    <select id="format" name="format">
-                        <option value="mp3">Audio (MP3)</option>
-                        <option value="mp4">Video (MP4)</option>
-                    </select>
-                </div>
+    <main>
+        <h1>ytConvert <span>· X, Instagram, YouTube</span></h1>
 
+        <form id="convertForm">
+            <input type="text" id="url" name="url" placeholder="Link yapıştır" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+            <div class="hint" id="platformHint"></div>
+
+            <div class="row">
+                <div class="seg">
+                    <input type="radio" name="format" id="fmt-mp4" value="mp4" checked>
+                    <label for="fmt-mp4">Video</label>
+                    <input type="radio" name="format" id="fmt-mp3" value="mp3">
+                    <label for="fmt-mp3">Ses</label>
+                </div>
                 <button type="submit" id="submitBtn">
-                    <div class="loading-spinner"></div>
-                    <span>Convert Now</span>
+                    <div class="spinner"></div>
+                    <span>İndir</span>
                 </button>
-            </form>
-            <div class="message" id="message"></div>
-        </div>
-        <p class="footer">Made for efficient conversions • ytConvert v2.0</p>
-    </div>
+            </div>
+        </form>
+
+        <div class="message" id="message"></div>
+    </main>
 
     <script>
         const form = document.getElementById('convertForm');
@@ -251,7 +199,7 @@
 
         const PLATFORMS = [
             { name: 'YouTube', re: /(^|\.)(youtube\.com|youtu\.be)$/ },
-            { name: 'X (Twitter)', re: /(^|\.)(twitter\.com|x\.com)$/ },
+            { name: 'X', re: /(^|\.)(twitter\.com|x\.com)$/ },
             { name: 'Instagram', re: /(^|\.)instagram\.com$/ },
         ];
 
@@ -271,7 +219,7 @@
         urlInput.addEventListener('input', () => {
             const value = urlInput.value.trim();
             const platform = value ? detectPlatform(value) : null;
-            hint.textContent = !value ? '' : platform ? `✓ ${platform}` : 'Desteklenmeyen link';
+            hint.textContent = !value ? '' : platform ? platform : 'Desteklenmeyen link';
         });
 
         form.addEventListener('submit', async (e) => {
@@ -294,11 +242,11 @@
                 // iPhone: paylaşım menüsü → "Videoyu Kaydet" ile direkt Fotoğraflar'a.
                 // Safari paylaşımı kullanıcı dokunuşu istediği için ayrı bir butonla açılıyor.
                 if (navigator.canShare && navigator.canShare({ files: [file] }) && /iPhone|iPad|Android/i.test(navigator.userAgent)) {
-                    showMessage(`Hazır: ${filename}`, 'success');
+                    showMessage(filename, 'success');
                     const saveBtn = document.createElement('button');
                     saveBtn.type = 'button';
                     saveBtn.className = 'save-btn';
-                    saveBtn.textContent = file.type.startsWith('video') ? 'Fotoğraflar\'a kaydet / paylaş' : 'Kaydet / paylaş';
+                    saveBtn.textContent = file.type.startsWith('video') ? 'Fotoğraflar\'a kaydet' : 'Kaydet';
                     saveBtn.onclick = () => navigator.share({ files: [file] }).catch(() => {});
                     message.appendChild(saveBtn);
                 } else {
@@ -309,7 +257,7 @@
                     link.click();
                     link.remove();
                     setTimeout(() => URL.revokeObjectURL(link.href), 60000);
-                    showMessage(`İndirildi: ${filename}`, 'success');
+                    showMessage(`İndirildi · ${filename}`, 'success');
                 }
             } catch (err) {
                 showMessage(err.message || 'Bir hata oluştu.', 'error');
