@@ -40,19 +40,20 @@
             min-height: 100vh;
             min-height: 100dvh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 24px 16px;
+            padding: 56px 16px 32px;
             -webkit-font-smoothing: antialiased;
         }
 
-        main { width: 100%; max-width: 420px; }
+        main { width: 100%; max-width: 440px; }
+
+        [hidden] { display: none !important; }
 
         h1 {
             font-size: 15px;
             font-weight: 600;
             letter-spacing: -0.01em;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         h1 span { color: var(--muted); font-weight: 400; }
@@ -74,14 +75,65 @@
         input::placeholder { color: var(--muted); }
 
         .hint {
-            height: 20px;
-            margin: 8px 2px 16px;
+            min-height: 20px;
+            margin: 8px 2px 12px;
             font-size: 13px;
             color: var(--muted);
         }
 
-        .row { display: flex; gap: 8px; }
+        .hint.error { color: var(--err); }
 
+        /* Önizleme */
+        .preview { margin-bottom: 16px; }
+
+        .thumb {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--field);
+        }
+
+        .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+        .duration {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, .75);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .title {
+            margin-top: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .sub { margin-top: 2px; font-size: 13px; color: var(--muted); }
+
+        .skeleton .thumb, .skeleton .bar {
+            background: linear-gradient(90deg, var(--field) 0%, var(--line) 50%, var(--field) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s ease-in-out infinite;
+        }
+
+        .skeleton .bar { height: 14px; border-radius: 6px; margin-top: 12px; }
+        .skeleton .bar.short { width: 40%; height: 12px; margin-top: 8px; }
+
+        @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+        /* Seçenekler */
         .seg {
             display: flex;
             padding: 3px;
@@ -90,13 +142,14 @@
             background: var(--field);
         }
 
-        .seg input { display: none; }
+        .seg input, .chips input { display: none; }
 
         .seg label {
+            flex: 1;
             display: flex;
             align-items: center;
-            padding: 0 16px;
-            height: 44px;
+            justify-content: center;
+            height: 38px;
             border-radius: 9px;
             font-size: 14px;
             font-weight: 500;
@@ -108,8 +161,32 @@
 
         .seg input:checked + label { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
 
+        .chips {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: 8px;
+            margin: 12px 0 16px;
+        }
+
+        .chips label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 52px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color .15s;
+        }
+
+        .chips label b { font-size: 14px; font-weight: 600; }
+        .chips label small { font-size: 11px; color: var(--muted); }
+        .chips input:checked + label { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+
         button {
-            flex: 1;
+            width: 100%;
             height: 52px;
             border: 0;
             border-radius: 12px;
@@ -121,16 +198,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 10px;
             transition: opacity .15s;
         }
 
         button:active { opacity: .8; }
-        button:disabled { opacity: .5; cursor: wait; }
+        button:disabled { opacity: .5; cursor: default; }
 
         .spinner {
             display: none;
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             border: 2px solid currentColor;
             border-right-color: transparent;
             border-radius: 50%;
@@ -140,31 +218,38 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .status-loading .spinner { display: block; }
-        .status-loading button span { display: none; }
 
-        .message {
-            display: none;
-            margin-top: 16px;
-            font-size: 14px;
+        /* İlerleme */
+        .progress { margin-top: 12px; }
+
+        .track { height: 4px; border-radius: 2px; background: var(--field); overflow: hidden; }
+
+        .fill {
+            height: 100%;
+            width: 0;
+            background: var(--fg);
+            transition: width .4s ease;
         }
 
+        .fill.indeterminate { width: 30%; animation: slide 1.1s ease-in-out infinite; }
+
+        @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+
+        .progress-text {
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .message { display: none; margin-top: 16px; font-size: 14px; }
         .message.show { display: block; }
         .message.error { color: var(--err); }
         .message.success { color: var(--ok); }
 
         .reveal { color: inherit; text-underline-offset: 3px; }
 
-        .save-btn {
-            width: 100%;
-            margin-top: 12px;
-            flex: none;
-        }
-
-        footer {
-            margin-top: 40px;
-            font-size: 12px;
-            color: var(--muted);
-        }
+        .save-btn { margin-top: 12px; }
     </style>
 </head>
 <body>
@@ -175,17 +260,40 @@
             <input type="text" id="url" name="url" placeholder="Link yapıştır" autocomplete="off" autocapitalize="off" spellcheck="false" required>
             <div class="hint" id="platformHint"></div>
 
-            <div class="row">
-                <div class="seg">
-                    <input type="radio" name="format" id="fmt-mp4" value="mp4" checked>
-                    <label for="fmt-mp4">Video</label>
-                    <input type="radio" name="format" id="fmt-mp3" value="mp3">
-                    <label for="fmt-mp3">Ses</label>
+            <div class="preview skeleton" id="skeleton" hidden>
+                <div class="thumb"></div>
+                <div class="bar"></div>
+                <div class="bar short"></div>
+            </div>
+
+            <div class="preview" id="preview" hidden>
+                <div class="thumb">
+                    <img id="thumb" alt="">
+                    <span class="duration" id="duration" hidden></span>
                 </div>
+                <div class="title" id="title"></div>
+                <div class="sub" id="sub"></div>
+            </div>
+
+            <div id="options" hidden>
+                <div class="seg">
+                    <input type="radio" name="kind" id="kind-video" value="video" checked>
+                    <label for="kind-video">Video</label>
+                    <input type="radio" name="kind" id="kind-audio" value="audio">
+                    <label for="kind-audio">Ses</label>
+                </div>
+
+                <div class="chips" id="chips"></div>
+
                 <button type="submit" id="submitBtn">
                     <div class="spinner"></div>
-                    <span>İndir</span>
+                    <span id="btnText">İndir</span>
                 </button>
+
+                <div class="progress" id="progress" hidden>
+                    <div class="track"><div class="fill" id="fill"></div></div>
+                    <div class="progress-text" id="progressText"></div>
+                </div>
             </div>
         </form>
 
@@ -193,60 +301,198 @@
     </main>
 
     <script>
-        const form = document.getElementById('convertForm');
-        const btn = document.getElementById('submitBtn');
-        const urlInput = document.getElementById('url');
-        const hint = document.getElementById('platformHint');
-        const message = document.getElementById('message');
+        const $ = (id) => document.getElementById(id);
+        const form = $('convertForm'), urlInput = $('url'), hint = $('platformHint');
+        const btn = $('submitBtn'), btnText = $('btnText'), message = $('message');
+        const chips = $('chips'), fill = $('fill'), progressText = $('progressText');
 
         const PLATFORMS = [
-            { name: 'YouTube', re: /(^|\.)(youtube\.com|youtu\.be)$/ },
-            { name: 'X', re: /(^|\.)(twitter\.com|x\.com)$/ },
-            { name: 'Instagram', re: /(^|\.)instagram\.com$/ },
+            { key: 'youtube', name: 'YouTube', re: /(^|\.)(youtube\.com|youtu\.be)$/ },
+            { key: 'twitter', name: 'X', re: /(^|\.)(twitter\.com|x\.com)$/ },
+            { key: 'instagram', name: 'Instagram', re: /(^|\.)instagram\.com$/ },
         ];
+
+        const AUDIO = [
+            { value: 'mp3', label: 'MP3', note: 'her yerde çalar' },
+            { value: 'm4a', label: 'M4A', note: 'daha hızlı' },
+        ];
+
+        let current = null;      // { url, info }
+        let lookup = null;       // AbortController
+        let debounce = null;
+        let busy = false;
 
         function detectPlatform(value) {
             try {
                 const url = new URL(/^https?:\/\//.test(value) ? value : 'https://' + value);
-                const found = PLATFORMS.find(p => p.re.test(url.hostname.toLowerCase()));
-                return found ? found.name : null;
+                return PLATFORMS.find(p => p.re.test(url.hostname.toLowerCase())) || null;
             } catch { return null; }
         }
+
+        const fmtDuration = (s) => {
+            if (!s) return '';
+            s = Math.round(s);
+            const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = String(s % 60).padStart(2, '0');
+            return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+        };
+
+        const fmtSize = (b) => !b ? '' : b >= 1e9 ? `~${(b / 1e9).toFixed(1)} GB` : `~${Math.max(1, Math.round(b / 1e6))} MB`;
 
         function showMessage(text, type) {
             message.textContent = text;
             message.className = `message show ${type}`;
         }
 
-        // Masaüstü uygulaması: panoda desteklenen link varsa kutuya otomatik doldurur
-        window.ytcPrefill = (value) => {
-            if (urlInput.value.trim() || btn.disabled) return;
-            urlInput.value = value;
-            urlInput.dispatchEvent(new Event('input'));
-        };
+        function resetView() {
+            $('skeleton').hidden = true;
+            $('preview').hidden = true;
+            $('options').hidden = true;
+            message.className = 'message';
+            current = null;
+        }
+
+        // --- Önizleme ---------------------------------------------------------
+
+        async function loadPreview(value) {
+            if (lookup) lookup.abort();
+            resetView();
+
+            const platform = detectPlatform(value);
+            hint.className = 'hint';
+            if (!value) { hint.textContent = ''; return; }
+            if (!platform) { hint.textContent = 'Desteklenmeyen link'; return; }
+
+            hint.textContent = platform.name;
+            $('skeleton').hidden = false;
+            lookup = new AbortController();
+
+            try {
+                const body = new FormData();
+                body.set('url', value);
+                const res = await fetch('/info', { method: 'POST', body, signal: lookup.signal });
+                if (!res.ok) throw new Error(await res.text());
+                const info = await res.json();
+                current = { url: value, info };
+                renderPreview(info, platform);
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                $('skeleton').hidden = true;
+                hint.textContent = err.message || 'Önizleme alınamadı.';
+                hint.className = 'hint error';
+            }
+        }
+
+        function renderPreview(info, platform) {
+            hint.textContent = '';
+            $('skeleton').hidden = true;
+            $('preview').hidden = false;
+            $('options').hidden = false;
+
+            const img = $('thumb');
+            img.hidden = !info.thumbnail;
+            if (info.thumbnail) img.src = info.thumbnail;
+
+            $('duration').hidden = !info.duration;
+            $('duration').textContent = fmtDuration(info.duration);
+            $('title').textContent = info.title;
+            $('sub').textContent = [info.uploader, platform.name].filter(Boolean).join(' · ');
+
+            $('kind-audio').disabled = !info.audio;
+            $('kind-audio').nextElementSibling.style.opacity = info.audio ? '' : '.4';
+            $('kind-video').checked = true;
+            renderChips();
+        }
+
+        function renderChips() {
+            if (!current) return;
+            const audio = $('kind-audio').checked;
+            const items = audio ? AUDIO : current.info.video.map(v => ({ value: v.value, label: v.label, note: fmtSize(v.size) }));
+            // Varsayılan: video için 1080p'yi geçmeyen en yüksek, ses için MP3
+            const preferred = audio ? 'mp3' : (items.find(i => +i.value <= 1080) || items[0]).value;
+
+            chips.innerHTML = '';
+            for (const item of items) {
+                const id = `q-${item.value}`;
+                const input = Object.assign(document.createElement('input'), {
+                    type: 'radio', name: 'choice', id, value: item.value, checked: item.value === preferred,
+                });
+                const label = document.createElement('label');
+                label.htmlFor = id;
+                const b = document.createElement('b'); b.textContent = item.label;
+                label.append(b);
+                if (item.note) { const s = document.createElement('small'); s.textContent = item.note; label.append(s); }
+                chips.append(input, label);
+            }
+        }
+
+        document.querySelectorAll('input[name="kind"]').forEach(r => r.addEventListener('change', renderChips));
 
         urlInput.addEventListener('input', () => {
-            const value = urlInput.value.trim();
-            const platform = value ? detectPlatform(value) : null;
-            hint.textContent = !value ? '' : platform ? platform : 'Desteklenmeyen link';
+            clearTimeout(debounce);
+            debounce = setTimeout(() => loadPreview(urlInput.value.trim()), 350);
         });
+
+        urlInput.addEventListener('paste', () => {
+            clearTimeout(debounce);
+            setTimeout(() => loadPreview(urlInput.value.trim()), 0);
+        });
+
+        // Masaüstü uygulaması: panoda desteklenen link varsa kutuya otomatik doldurur
+        window.ytcPrefill = (value) => {
+            if (urlInput.value.trim() || busy) return;
+            urlInput.value = value;
+            loadPreview(value);
+        };
+
+        // --- İndirme ----------------------------------------------------------
+
+        function setProgress(p) {
+            const labels = { starting: 'Başlatılıyor', video: 'Video indiriliyor', audio: 'Ses indiriliyor', processing: 'Dönüştürülüyor' };
+            const known = typeof p.percent === 'number';
+            fill.classList.toggle('indeterminate', !known);
+            fill.style.width = known ? `${p.percent}%` : '';
+            const parts = [labels[p.phase] || 'Hazırlanıyor'];
+            if (known) parts[0] += ` %${Math.floor(p.percent)}`;
+            if (p.speed) parts.push(`${(p.speed / 1e6).toFixed(1)} MB/s`);
+            if (p.eta) parts.push(`${fmtDuration(p.eta)} kaldı`);
+            progressText.textContent = parts.join(' · ');
+        }
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!current || busy) return;
+
+            const choice = form.querySelector('input[name="choice"]:checked')?.value;
+            const audio = $('kind-audio').checked;
+            const job = crypto.randomUUID();
+            const body = new FormData();
+            body.set('url', current.url);
+            body.set('format', audio ? choice : 'mp4');
+            if (!audio) body.set('quality', choice);
+            body.set('job', job);
+
+            busy = true;
             message.className = 'message';
             document.body.classList.add('status-loading');
             btn.disabled = true;
+            btnText.textContent = 'İndiriliyor';
+            $('progress').hidden = false;
+            setProgress({ phase: 'starting' });
+
+            const poll = setInterval(async () => {
+                try {
+                    const p = await (await fetch(`/progress/${job}`)).json();
+                    if (p.phase) setProgress(p);
+                } catch {}
+            }, 500);
 
             try {
-                const res = await fetch('/convert', { method: 'POST', body: new FormData(form) });
+                const res = await fetch('/convert', { method: 'POST', body });
                 if (!res.ok) throw new Error(await res.text());
 
                 const filename = decodeURIComponent(res.headers.get('X-Filename') || 'download');
                 const blob = await res.blob();
                 const file = new File([blob], filename, { type: blob.type });
-
-                urlInput.value = '';
-                hint.textContent = '';
 
                 // iPhone: paylaşım menüsü → "Videoyu Kaydet" ile direkt Fotoğraflar'a.
                 // Safari paylaşımı kullanıcı dokunuşu istediği için ayrı bir butonla açılıyor.
@@ -269,19 +515,23 @@
                     const reveal = window.webkit?.messageHandlers?.reveal;
                     showMessage(reveal ? `İndirilenler'e kaydedildi · ${filename}` : `İndirildi · ${filename}`, 'success');
                     if (reveal) {
-                        const btn = document.createElement('a');
-                        btn.href = '#';
-                        btn.className = 'reveal';
-                        btn.textContent = "Finder'da göster";
-                        btn.onclick = (ev) => { ev.preventDefault(); reveal.postMessage(null); };
-                        message.append(' ', btn);
+                        const a = document.createElement('a');
+                        a.href = '#';
+                        a.className = 'reveal';
+                        a.textContent = "Finder'da göster";
+                        a.onclick = (ev) => { ev.preventDefault(); reveal.postMessage(null); };
+                        message.append(' ', a);
                     }
                 }
             } catch (err) {
                 showMessage(err.message || 'Bir hata oluştu.', 'error');
             } finally {
+                clearInterval(poll);
+                busy = false;
                 document.body.classList.remove('status-loading');
                 btn.disabled = false;
+                btnText.textContent = 'İndir';
+                $('progress').hidden = true;
             }
         });
     </script>

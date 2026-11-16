@@ -31,16 +31,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         webView.navigationDelegate = self
         webView.setValue(false, forKey: "drawsBackground") // yüklenirken beyaz flaş olmasın
 
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 520, height: 420),
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 760),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                           backing: .buffered, defer: false)
         window.title = "ytConvert"
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-        window.minSize = NSSize(width: 400, height: 340)
+        window.minSize = NSSize(width: 420, height: 560)
         window.contentView = webView
         window.center()
-        window.setFrameAutosaveName("ytConvertMain")
+        window.setFrameAutosaveName("ytConvertWindow")
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
 
@@ -62,9 +62,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
               let text = pb.string(forType: .string)?.trimmingCharacters(in: .whitespacesAndNewlines),
               supportedLink.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) != nil
         else { return }
-        lastClipboardChange = pb.changeCount
-        let js = "window.ytcPrefill && window.ytcPrefill(\(jsString(text)))"
-        webView.evaluateJavaScript(js, completionHandler: nil)
+        // Sayfa henüz yüklenmediyse işlendi sayma; didFinish'te tekrar denenir.
+        let change = pb.changeCount
+        let js = "window.ytcPrefill ? (window.ytcPrefill(\(jsString(text))), true) : false"
+        webView.evaluateJavaScript(js) { result, _ in
+            if (result as? Bool) == true { self.lastClipboardChange = change }
+        }
     }
 
     // MARK: - Sunucu bağlantısı
