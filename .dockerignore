@@ -1,0 +1,6 @@
+.venv/
+.git/
+downloads/
+cookies.txt
+__pycache__/
+.DS_Store
